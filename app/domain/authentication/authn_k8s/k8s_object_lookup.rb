@@ -111,10 +111,10 @@ module Authentication
       # "replica_set".
       #
       # @return nil if no such object exists.
-      def find_object_by_name resource_type, resource_name, namespace
+      def find_object_by_name resource_type, resource_value, namespace
         begin
           handle_object_not_found do
-            invoke_k8s_method "get_#{resource_type}", resource_name, namespace
+            invoke_k8s_method "get_#{resource_type}", resource_value, namespace
           end
         rescue KubeException => e
           # This error message can be a bit confusing when multiple authorizers are
