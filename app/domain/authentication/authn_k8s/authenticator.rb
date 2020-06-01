@@ -76,8 +76,7 @@ module Authentication
 
       # username in this context is the host name
       def host_common_name
-        resource_name = username
-        CommonName.from_host_resource_name(resource_name).to_s
+        CommonName.from_host_id(username).to_s
       end
 
       def webservice_ca

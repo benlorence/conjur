@@ -9,8 +9,8 @@ module Authentication
   module AuthnK8s
     class CommonName
 
-      def self.from_host_resource_name(name)
-        common_name = name.tr('/', '.')
+      def self.from_host_id(host_id)
+        common_name = host_id.tr('/', '.')
         new(common_name)
       end
 

@@ -107,14 +107,14 @@ module Authentication
       # Look up an object according to the resource name. In Kubernetes, the
       # "resource" means something like ReplicaSet, Job, Deployment, etc.
       #
-      # Here, resource_name should be the underscore-ized resource, e.g.
+      # Here, resource_type should be the underscore-ized resource, e.g.
       # "replica_set".
       #
       # @return nil if no such object exists.
-      def find_object_by_name resource_name, name, namespace
+      def find_object_by_name resource_type, resource_name, namespace
         begin
           handle_object_not_found do
-            invoke_k8s_method "get_#{resource_name}", name, namespace
+            invoke_k8s_method "get_#{resource_type}", resource_name, namespace
           end
         rescue KubeException => e
           # This error message can be a bit confusing when multiple authorizers are
