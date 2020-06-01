@@ -40,6 +40,11 @@ unless defined? LogMessages::Authentication::OriginValidated
         code: "CONJ00033D"
       )
 
+      ValidatedApplicationIdentity = ::Util::TrackableLogMessageClass.new(
+        msg:  "Application identity validated",
+        code: "CONJ00030D"
+      )
+
       module Security
 
         SecurityValidated = ::Util::TrackableLogMessageClass.new(
@@ -174,11 +179,6 @@ unless defined? LogMessages::Authentication::OriginValidated
         ExtractedApplicationIdentityFromToken = ::Util::TrackableLogMessageClass.new(
           msg:  "Extracted application identity from token",
           code: "CONJ00029D"
-        )
-
-        ValidatedApplicationIdentity = ::Util::TrackableLogMessageClass.new(
-          msg:  "Application identity validated",
-          code: "CONJ00030D"
         )
 
         ExtractedFieldFromAzureToken = ::Util::TrackableLogMessageClass.new(
