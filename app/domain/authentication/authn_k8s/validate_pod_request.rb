@@ -9,7 +9,7 @@ module Authentication
     SecurityErr = Errors::Authentication::Security
     # Possible Errors Raised:
     # WebserviceNotFound, RoleNotAuthorizedOnResource, PodNotFound
-    # ContainerNotFound, ScopeNotSupported, K8sResourceNotFound
+    # ContainerNotFound, ConstraintNotSupported, K8sResourceNotFound
 
     AUTHENTICATION_CONTAINER_NAME_ANNOTATION = "authentication-container-name"
     DEFAULT_AUTHENTICATION_CONTAINER_NAME = "authenticator"

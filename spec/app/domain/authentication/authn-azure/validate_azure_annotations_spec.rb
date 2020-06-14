@@ -55,7 +55,7 @@ RSpec.describe 'Authentication::AuthnAzure::ValidateAzureAnnotations' do
         end
 
         it "raises a ConstraintNotSupported error" do
-          expect { subject }.to raise_error(::Errors::Authentication::AuthnAzure::ConstraintNotSupported)
+          expect { subject }.to raise_error(::Errors::Authentication::ConstraintNotSupported)
         end
       end
     end
@@ -83,7 +83,7 @@ RSpec.describe 'Authentication::AuthnAzure::ValidateAzureAnnotations' do
         end
 
         it "raises a ConstraintNotSupported error" do
-          expect { subject }.to raise_error(::Errors::Authentication::AuthnAzure::ConstraintNotSupported)
+          expect { subject }.to raise_error(::Errors::Authentication::ConstraintNotSupported)
         end
       end
     end

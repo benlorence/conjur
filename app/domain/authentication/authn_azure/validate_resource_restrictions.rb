@@ -61,7 +61,7 @@ module Authentication
         prefixed_annotations(prefix).each do |annotation|
           annotation_name = annotation[:name]
           next if prefixed_permitted_constraints(prefix).include?(annotation_name)
-          raise Err::ConstraintNotSupported.new(annotation_name.gsub(prefix, ""), AZURE_RESOURCE_TYPES)
+          raise Errors::Authentication::ConstraintNotSupported.new(annotation_name.gsub(prefix, ""), AZURE_RESOURCE_TYPES)
         end
       end
 

@@ -7,7 +7,7 @@ module Authentication
     Err ||= Errors::Authentication::AuthnK8s
     # Possible Errors Raised: NamespaceMismatch, ContainerNotFound,
     # K8sResourceNotFound, IllegalConstraintCombinations,
-    # ScopeNotSupported, InvalidHostId, RoleMissingConstraint
+    # ConstraintNotSupported, InvalidHostId, RoleMissingConstraint
 
     K8S_RESOURCE_TYPES = %w(namespace service-account pod deployment stateful-set deployment-config)
 
@@ -80,7 +80,7 @@ module Authentication
         prefixed_k8s_annotations(prefix).each do |annotation|
           annotation_name = annotation[:name]
           next if prefixed_permitted_annotations(prefix).include?(annotation_name)
-          raise Err::ScopeNotSupported.new(annotation_name.gsub(prefix, ""), K8S_RESOURCE_TYPES)
+          raise Errors::Authentication::ConstraintNotSupported.new(annotation_name.gsub(prefix, ""), K8S_RESOURCE_TYPES)
         end
       end
 
@@ -122,7 +122,7 @@ module Authentication
 
         resource_type       = host_id_suffix[-2]
         unless underscored_k8s_resource_types.include?(resource_type)
-          raise Err::ScopeNotSupported.new(resource_type, underscored_k8s_resource_types)
+          raise Errors::Authentication::ConstraintNotSupported.new(resource_type, underscored_k8s_resource_types)
         end
       end
 

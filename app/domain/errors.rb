@@ -55,6 +55,12 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
         code: "CONJ00055E"
       )
 
+      ConstraintNotSupported = ::Util::TrackableErrorClass.new(
+        msg:  "Resource type '{0}' is not a supported resource restriction. " \
+            "The supported resources are '{1}'",
+        code: "CONJ00050E"
+      )
+
       module AuthenticatorClass
 
         DoesntStartWithAuthn = ::Util::TrackableErrorClass.new(
@@ -199,12 +205,6 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
           code: "CONJ00024E"
         )
 
-        ScopeNotSupported = ::Util::TrackableErrorClass.new(
-          msg:  "Resource type '{0}' is not a supported resource restriction. " \
-            "The supported resources are '{1}'",
-          code: "CONJ00025E"
-        )
-
         K8sResourceNotFound = ::Util::TrackableErrorClass.new(
           msg:  "Kubernetes {0-resource-name} {1-object-name} not found in namespace {2}",
           code: "CONJ00026E"
@@ -320,12 +320,6 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
           msg:  "Resource restriction '{0-resource-restriction-name}' does not match " \
             "resource in Azure token",
           code: "CONJ00049E"
-        )
-
-        ConstraintNotSupported = ::Util::TrackableErrorClass.new(
-          msg:  "Constraint type '{0}' is not a supported resource restriction. " \
-            "The supported resources are '{1}'",
-          code: "CONJ00050E"
         )
 
         TokenFieldNotFoundOrEmpty = ::Util::TrackableErrorClass.new(
