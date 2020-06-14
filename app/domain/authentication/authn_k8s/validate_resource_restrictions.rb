@@ -11,60 +11,60 @@ module Authentication
 
     K8S_RESOURCE_TYPES = %w(namespace service-account pod deployment stateful-set deployment-config)
 
-    ValidateApplicationIdentity ||= CommandClass.new(
+    ValidateResourceRestrictions ||= CommandClass.new(
       dependencies: {
-        resource_class:             ::Resource,
-        k8s_resolver:               K8sResolver,
-        k8s_object_lookup_class:    K8sObjectLookup,
-        application_identity_class: ApplicationIdentity,
-        logger:                     Rails.logger
+        resource_class:              ::Resource,
+        k8s_resolver:                K8sResolver,
+        k8s_object_lookup_class:     K8sObjectLookup,
+        resource_restrictions_class: ResourceRestrictions,
+        logger:                      Rails.logger
       },
       inputs:       %i(host_id host_annotations account service_id spiffe_id authentication_container_name_annotation)
     ) do
 
       def call
-        extract_application_identity_from_role
-        validate_application_identity_configuration
-        validate_application_identity_matches_request
+        extract_resource_restrictions_from_role
+        validate_resource_restrictions_configuration
+        validate_resource_restrictions_matches_request
       end
 
       private
 
-      def extract_application_identity_from_role
-        application_identity
+      def extract_resource_restrictions_from_role
+        resource_restrictions
       end
 
-      def application_identity
-        @application_identity ||= @application_identity_class.new(
+      def resource_restrictions
+        @resource_restrictions ||= @resource_restrictions_class.new(
           host_id:          host_id_suffix,
           host_annotations: @host_annotations,
           service_id:       @service_id,
-          application_identity_in_annotations: application_identity_in_annotations?,
+          resource_restrictions_in_annotations: resource_restrictions_in_annotations?,
           k8s_resource_types: K8S_RESOURCE_TYPES,
           logger: @logger
         )
       end
 
-      def validate_application_identity_configuration
+      def validate_resource_restrictions_configuration
         validate_permitted_scope
         validate_required_constraints_exist
         validate_constraint_combinations
       end
 
-      # If the application identity is defined in:
+      # If the resource restrictions are defined in:
       #   - annotations: validates that all the constraints are
       #                  valid (e.g there is no "authn-k8s/blah" annotation)
       #   - host id: validates that the host-id has 3 parts and that the given
       #              constraint is valid (e.g the host id is not
       #              "namespace/blah/some-value")
       def validate_permitted_scope
-        application_identity_in_annotations? ? validate_permitted_annotations : validate_host_id
+        resource_restrictions_in_annotations? ? validate_permitted_annotations : validate_host_id
       end
 
-      # We expect the application identity to be defined by the host's annotations
+      # We expect the resource restrictions to be defined by the host's annotations
       # if any of the constraint annotations is present.
-      def application_identity_in_annotations?
-        @application_identity_in_annotations ||= K8S_RESOURCE_TYPES.any? do |resource_type|
+      def resource_restrictions_in_annotations?
+        @resource_restrictions_in_annotations ||= K8S_RESOURCE_TYPES.any? do |resource_type|
           resource_from_annotation(resource_type)
         end
       end
@@ -135,16 +135,16 @@ module Authentication
       end
 
       def validate_resource_constraint_exists resource_type
-        resource = application_identity.resources.find { |a| a.type == resource_type }
+        resource = resource_restrictions.resources.find { |a| a.type == resource_type }
         raise Err::RoleMissingConstraint, resource_type unless resource
       end
 
-      # Validates that the application identity doesn't include logical resource constraint
+      # Validates that the resource restrictions don't include logical resource constraint
       # combinations (e.g deployment & deploymentConfig)
       def validate_constraint_combinations
         identifiers = %w(deployment deployment-config stateful-set)
 
-        identifiers_constraints = application_identity.resources.map(&:type) & identifiers
+        identifiers_constraints = resource_restrictions.resources.map(&:type) & identifiers
         unless identifiers_constraints.length <= 1
           raise Errors::Authentication::IllegalConstraintCombinations, identifiers_constraints
         end
@@ -165,8 +165,8 @@ module Authentication
         end
       end
 
-      def validate_application_identity_matches_request
-        application_identity.resources.each do |resource_from_role|
+      def validate_resource_restrictions_matches_request
+        resource_restrictions.resources.each do |resource_from_role|
           resource_type   = underscored_k8s_resource_type(resource_from_role.type)
           resource_value   = resource_from_role.value
           if resource_type == "namespace"
@@ -195,7 +195,7 @@ module Authentication
             )
             .validate_pod
         end
-        @logger.debug(LogMessages::Authentication::ValidatedApplicationIdentity.new)
+        @logger.debug(LogMessages::Authentication::ValidatedResourceRestrictions.new)
       end
 
       def k8s_object_lookup
@@ -232,7 +232,7 @@ module Authentication
       end
 
       # Return the last three parts of the host id, which consist of the host's
-      # Application Identity
+      # resource restrictions
       def host_id_suffix
         @host_id_suffix ||= hostname.split('/').last(3)
       end

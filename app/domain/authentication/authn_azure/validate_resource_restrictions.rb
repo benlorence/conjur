@@ -5,36 +5,36 @@ module Authentication
 
     Log = LogMessages::Authentication::AuthnAzure
     Err = Errors::Authentication::AuthnAzure
-    # Possible Errors Raised: RoleNotFound, InvalidApplicationIdentity, XmsMiridParseError,
+    # Possible Errors Raised: RoleNotFound, InvalidResourceRestrictions, XmsMiridParseError,
     # MissingProviderFieldsInXmsMirid, MissingConstraint,
     # IllegalConstraintCombinations
 
     AZURE_RESOURCE_TYPES = %w(subscription-id resource-group user-assigned-identity system-assigned-identity)
 
-    ValidateApplicationIdentity = CommandClass.new(
+    ValidateResourceRestrictions = CommandClass.new(
       dependencies: {
-        role_class:                 ::Role,
-        resource_class:             ::Resource,
-        application_identity_class: ApplicationIdentity,
-        logger:                     Rails.logger
+        role_class:                  ::Role,
+        resource_class:              ::Resource,
+        resource_restrictions_class: ResourceRestrictions,
+        logger:                      Rails.logger
       },
       inputs:       %i(account service_id username xms_mirid_token_field oid_token_field)
     ) do
 
       def call
-        extract_application_identity_from_role
-        validate_application_identity_configuration
-        validate_application_identity_matches_request
+        extract_resource_restrictions_from_role
+        validate_resource_restrictions_configuration
+        validate_resource_restrictions_matches_request
       end
 
       private
 
-      def extract_application_identity_from_role
-        application_identity
+      def extract_resource_restrictions_from_role
+        resource_restrictions
       end
 
-      def application_identity
-        @application_identity ||= @application_identity_class.new(
+      def resource_restrictions
+        @resource_restrictions ||= @resource_restrictions_class.new(
           role_annotations: role_annotations,
           service_id:       @service_id,
           azure_resource_types: AZURE_RESOURCE_TYPES,
@@ -42,7 +42,7 @@ module Authentication
         )
       end
 
-      def validate_application_identity_configuration
+      def validate_resource_restrictions_configuration
         validate_permitted_scope
         validate_required_constraints_exist
         validate_constraint_combinations
@@ -86,16 +86,16 @@ module Authentication
       end
 
       def validate_resource_constraint_exists resource_type
-        resource = application_identity.resources.find { |a| a.type == resource_type }
+        resource = resource_restrictions.resources.find { |a| a.type == resource_type }
         raise Err::RoleMissingConstraint, resource_type unless resource
       end
 
-      # validates that the application identity doesn't include logical resource constraint
+      # validates that the resource restrictions do include logical resource constraint
       # combinations (e.g user_assigned_identity & system_assigned_identity)
       def validate_constraint_combinations
         identifiers = %w(user-assigned-identity system-assigned-identity)
 
-        identifiers_constraints = application_identity.resources.map(&:type) & identifiers
+        identifiers_constraints = resource_restrictions.resources.map(&:type) & identifiers
         unless identifiers_constraints.length <= 1
           raise Errors::Authentication::IllegalConstraintCombinations, identifiers_constraints
         end
@@ -136,25 +136,25 @@ module Authentication
             )
           )
         end
-        @logger.debug(Log::ExtractedApplicationIdentityFromToken.new)
+        @logger.debug(Log::ExtractedResourceRestrictionsFromToken.new)
       end
 
       def xms_mirid
         @xms_mirid ||= XmsMirid.new(@xms_mirid_token_field)
       end
 
-      def validate_application_identity_matches_request
+      def validate_resource_restrictions_matches_request
         extract_resources_from_token
 
-        application_identity.resources.each do |resource_from_role|
+        resource_restrictions.resources.each do |resource_from_role|
           @resources_from_token.each do |resource_from_token|
             if resource_from_token.type == resource_from_role.type &&
               resource_from_token.value != resource_from_role.value
-                raise Err::InvalidApplicationIdentity, resource_from_role.type
+                raise Err::InvalidResourceRestrictions, resource_from_role.type
             end
           end
         end
-        @logger.debug(LogMessages::Authentication::ValidatedApplicationIdentity.new)
+        @logger.debug(LogMessages::Authentication::ValidatedResourceRestrictions.new)
       end
 
       def role

@@ -20,7 +20,7 @@ module Authentication
         k8s_object_lookup_class:       K8sObjectLookup,
         validate_security:             ::Authentication::Security::ValidateSecurity.new,
         enabled_authenticators:        Authentication::InstalledAuthenticators.enabled_authenticators_str(ENV),
-        validate_application_identity: ValidateApplicationIdentity.new,
+        validate_resource_restrictions: ValidateResourceRestrictions.new,
         logger:                        Rails.logger
       },
       inputs:       %i(pod_request)
@@ -32,7 +32,7 @@ module Authentication
       def call
         validate_security
         validate_pod_exists
-        validate_application_identity
+        validate_resource_restrictions
         validate_container
       end
 
@@ -51,8 +51,8 @@ module Authentication
         raise Err::PodNotFound.new(pod_name, pod_namespace) unless pod
       end
 
-      def validate_application_identity
-        @validate_application_identity.(
+      def validate_resource_restrictions
+        @validate_resource_restrictions.(
           host_id: k8s_host.conjur_host_id,
           host_annotations: host.annotations,
           service_id: service_id,

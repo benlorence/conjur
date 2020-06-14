@@ -11,14 +11,14 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
   let(:service) { "my-service" }
 
   let(:mocked_verify_and_decode_token) { double("VerifyAndDecodeAzureToken") }
-  let(:mocked_validate_application_identity) { double("ValidateApplicationIdentity") }
+  let(:mocked_validate_resource_restrictions) { double("ValidateResourceRestrictions") }
 
   before(:each) do
     allow(mocked_verify_and_decode_token).to receive(:call) { |*args|
       JSON.parse(args[0][:token_jwt]).to_hash
     }
 
-    allow(mocked_validate_application_identity).to receive(:call).and_return(true)
+    allow(mocked_validate_resource_restrictions).to receive(:call).and_return(true)
   end
 
   ####################################
@@ -59,7 +59,7 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
   context "An Azure authenticator" do
     context "that receives an authenticate request" do
       context "with a valid azure token" do
-        context "with a valid application identity" do
+        context "with valid resource restrictions" do
           subject do
             input_ = Authentication::AuthenticatorInput.new(
               authenticator_name: authenticator_name,
@@ -72,8 +72,8 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
             )
 
             ::Authentication::AuthnAzure::Authenticator.new(
-              verify_and_decode_token:       mocked_verify_and_decode_token,
-              validate_application_identity: mocked_validate_application_identity
+              verify_and_decode_token:        mocked_verify_and_decode_token,
+              validate_resource_restrictions: mocked_validate_resource_restrictions
             ).call(
               authenticator_input: input_
             )
@@ -87,7 +87,7 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
           it_behaves_like "it fails when variable is missing or has no value", "provider-uri"
         end
 
-        context "with an invalid application identity" do
+        context "with invalid resource restrictions" do
           subject do
             input_ = Authentication::AuthenticatorInput.new(
               authenticator_name: 'authn-azure',
@@ -100,19 +100,19 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
             )
 
             ::Authentication::AuthnAzure::Authenticator.new(
-              verify_and_decode_token:       mocked_verify_and_decode_token,
-              validate_application_identity: mocked_validate_application_identity
+              verify_and_decode_token:        mocked_verify_and_decode_token,
+              validate_resource_restrictions: mocked_validate_resource_restrictions
             ).call(
               authenticator_input: input_
             )
           end
 
-          it 'raises the error raised by mocked_validate_application_identity' do
-            allow(mocked_validate_application_identity).to receive(:call)
-                                                             .and_raise('FAKE_VALIDATE_APPLICATION_IDENTITY_ERROR')
+          it 'raises the error raised by mocked_validate_resource_restrictions' do
+            allow(mocked_validate_resource_restrictions).to receive(:call)
+                                                             .and_raise('FAKE_VALIDATE_RESOURCE_RESTRICTIONS_ERROR')
 
             expect { subject }.to raise_error(
-              /FAKE_VALIDATE_APPLICATION_IDENTITY_ERROR/
+              /FAKE_VALIDATE_RESOURCE_RESTRICTIONS_ERROR/
             )
           end
         end
@@ -132,8 +132,8 @@ RSpec.describe 'Authentication::AuthnAzure::Authenticator' do
             )
 
             ::Authentication::AuthnAzure::Authenticator.new(
-              verify_and_decode_token:       mocked_verify_and_decode_token,
-              validate_application_identity: mocked_validate_application_identity
+              verify_and_decode_token:        mocked_verify_and_decode_token,
+              validate_resource_restrictions: mocked_validate_resource_restrictions
             ).call(
               authenticator_input: input_
             )

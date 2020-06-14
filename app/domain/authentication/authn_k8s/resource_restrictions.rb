@@ -3,16 +3,26 @@
 module Authentication
   module AuthnK8s
 
-    # This class defines an application identity of a given Conjur host
-    class ApplicationIdentity
+    # This class represents the restrictions that are set on a Conjur host regarding
+    # the K8s resources that it can authenticate with Conjur from.
+    # It consists a list of K8sResource objects which represent the resource
+    # restriction that need to be met in an authentication request.
+    #
+    # For example, if `resources` includes the K8sResource:
+    #   - type: "namespace"
+    #   - value: "some-namespace"
+    #
+    # then this Conjur host can authenticate with Conjur only from a pod that is
+    # part of the namespace "some-namespace"
+    class ResourceRestrictions
 
       attr_reader :resources
       
-      def initialize(host_id:, host_annotations:, service_id:, application_identity_in_annotations:, k8s_resource_types:, logger:)
+      def initialize(host_id:, host_annotations:, service_id:, resource_restrictions_in_annotations:, k8s_resource_types:, logger:)
         @host_id          = host_id
         @host_annotations = host_annotations
         @service_id       = service_id
-        @application_identity_in_annotations = application_identity_in_annotations
+        @resource_restrictions_in_annotations = resource_restrictions_in_annotations
         @k8s_resource_types = k8s_resource_types
         @logger           = logger
 
@@ -36,7 +46,7 @@ module Authentication
       end
 
       def resource_value resource_type
-        @application_identity_in_annotations ? resource_from_annotation(resource_type) : resource_from_id(underscored_resource_type(resource_type))
+        @resource_restrictions_in_annotations ? resource_from_annotation(resource_type) : resource_from_id(underscored_resource_type(resource_type))
       end
 
       def resource_from_annotation resource_type

@@ -166,10 +166,10 @@ module Authentication
         @k8s_object_lookup ||= K8sObjectLookup.new(webservice)
       end
 
-      # This code is implemented similarly also in application_identity.rb
+      # This code is implemented similarly also in resource_restrictions.rb
       # We have it here too as we need the container name for the injection
       # and it simplifies the code to have this specific 2 methods duplicated
-      # rather than passing around the ApplicationIdentity object
+      # rather than passing around the ResourceRestrictions object
       def container_name
         container_annotation_value("authn-k8s/#{@service_id}") ||
           container_annotation_value("authn-k8s") ||

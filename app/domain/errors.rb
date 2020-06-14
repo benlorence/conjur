@@ -51,7 +51,7 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
       )
 
       IllegalConstraintCombinations = ::Util::TrackableErrorClass.new(
-        msg:  "Application identity includes an illegal resource constraint combination - '{0-constraints}'",
+        msg:  "Resource restrictions include an illegal resource constraint combination - '{0-constraints}'",
         code: "CONJ00055E"
       )
 
@@ -200,7 +200,7 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
         )
 
         ScopeNotSupported = ::Util::TrackableErrorClass.new(
-          msg:  "Resource type '{0}' is not a supported application identity. " \
+          msg:  "Resource type '{0}' is not a supported resource restriction. " \
             "The supported resources are '{1}'",
           code: "CONJ00025E"
         )
@@ -273,7 +273,7 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
 
         NamespaceMismatch = ::Util::TrackableErrorClass.new(
           msg:  "Namespace in SPIFFE ID '{0-spiffe-namespace}' must match namespace " \
-            "implied by application identity '{1-application-identity-namespace}'",
+            "implied by resource restriction: '{1-resource-restrictions-namespace}'",
           code: "CONJ00023E"
         )
 
@@ -316,14 +316,14 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
           code: "CONJ00057E"
         )
 
-        InvalidApplicationIdentity = ::Util::TrackableErrorClass.new(
-          msg:  "Application identity field '{0-field-name}' does not match " \
-            "application identity in Azure token",
+        InvalidResourceRestrictions = ::Util::TrackableErrorClass.new(
+          msg:  "Resource restriction '{0-resource-restriction-name}' does not match " \
+            "resource in Azure token",
           code: "CONJ00049E"
         )
 
         ConstraintNotSupported = ::Util::TrackableErrorClass.new(
-          msg:  "Constraint type '{0}' is not a supported application identity. " \
+          msg:  "Constraint type '{0}' is not a supported resource restriction. " \
             "The supported resources are '{1}'",
           code: "CONJ00050E"
         )

@@ -46,7 +46,7 @@ RSpec.describe Authentication::AuthnK8s::ValidatePodRequest do
 
   let(:k8s_object_lookup_class) { double("K8sObjectLookup") }
 
-  let(:validate_application_identity) { double("ValidateApplicationIdentity") }
+  let(:validate_resource_restrictions) { double("ValidateResourceRestrictions") }
 
   before(:each) do
     allow(resource_class).to receive(:[])
@@ -62,10 +62,10 @@ RSpec.describe Authentication::AuthnK8s::ValidatePodRequest do
     allow(k8s_object_lookup_class).to receive(:new)
                                         .and_return(k8s_object_lookup_class)
 
-    allow(Authentication::AuthnK8s::ValidateApplicationIdentity)
+    allow(Authentication::AuthnK8s::ValidateResourceRestrictions)
       .to receive(:new)
-            .and_return(validate_application_identity)
-    allow(validate_application_identity).to receive(:call)
+            .and_return(validate_resource_restrictions)
+    allow(validate_resource_restrictions).to receive(:call)
                                               .and_return(true)
   end
 
@@ -76,7 +76,7 @@ RSpec.describe Authentication::AuthnK8s::ValidatePodRequest do
         k8s_object_lookup_class:       k8s_object_lookup_class,
         validate_security:             mocked_security_validator,
         enabled_authenticators:        "#{authenticator_name}/#{service_id}",
-        validate_application_identity: validate_application_identity
+        validate_resource_restrictions: validate_resource_restrictions
       ).call(
         pod_request: pod_request
       )
@@ -98,13 +98,13 @@ RSpec.describe Authentication::AuthnK8s::ValidatePodRequest do
       )
     end
 
-    it 'raises an error when application identity validation fails' do
-      allow(validate_application_identity).to receive(:call)
-                                                .and_raise('FAKE_APPLICATION_IDENTITY_ERROR')
+    it 'raises an error when resource restrictions validation fails' do
+      allow(validate_resource_restrictions).to receive(:call)
+                                                .and_raise('FAKE_RESOURCE_RESTRICTIONS_ERROR')
 
       expect { subject }.to(
         raise_error(
-          /FAKE_APPLICATION_IDENTITY_ERROR/
+          /FAKE_RESOURCE_RESTRICTIONS_ERROR/
         )
       )
     end

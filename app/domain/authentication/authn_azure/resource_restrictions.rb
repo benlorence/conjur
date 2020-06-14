@@ -1,7 +1,19 @@
 module Authentication
   module AuthnAzure
 
-    class ApplicationIdentity
+    # This class represents the restrictions that are set on a Conjur host regarding
+    # the Azure resources that it can authenticate with Conjur from.
+    # It consists a list of AzureResource objects which represent the resource
+    # restriction that need to be met in an authentication request.
+    #
+    # For example, if `resources` includes the AzureResource:
+    #   - type: "subscription-id"
+    #   - value: "some-subscription-id"
+    #
+    # then this Conjur host can authenticate with Conjur only with an Azure AD
+    # token that was granted to an Azure resource that is part of the "some-subscription-id"
+    # subscription
+    class ResourceRestrictions
 
       attr_reader :resources
 

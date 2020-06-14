@@ -40,8 +40,8 @@ unless defined? LogMessages::Authentication::OriginValidated
         code: "CONJ00033D"
       )
 
-      ValidatedApplicationIdentity = ::Util::TrackableLogMessageClass.new(
-        msg:  "Application identity validated",
+      ValidatedResourceRestrictions = ::Util::TrackableLogMessageClass.new(
+        msg:  "Resource restrictions validated",
         code: "CONJ00030D"
       )
 
@@ -176,8 +176,8 @@ unless defined? LogMessages::Authentication::OriginValidated
 
       module AuthnAzure
 
-        ExtractedApplicationIdentityFromToken = ::Util::TrackableLogMessageClass.new(
-          msg:  "Extracted application identity from token",
+        ExtractedResourceRestrictionsFromToken = ::Util::TrackableLogMessageClass.new(
+          msg:  "Extracted resource restrictions from token",
           code: "CONJ00029D"
         )
 
