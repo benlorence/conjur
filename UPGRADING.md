@@ -18,6 +18,7 @@ The following steps should be done on each upgrade:
 
 ## Specific steps
 
+### 1.8.0
 **This step should be done  when upgrading from version 1.7.2 and below to a newer version**
 
 Due to encryption changes in newer versions there is a need to run this command
