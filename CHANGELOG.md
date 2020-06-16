@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
+
+### Changed
+- Uses OpenSSL 1.0.2u to support FIPS compliance 
+- Conjur can be configured to run in FIPS compliant or Non-FIPS compliant mode depending on requirements.
+  FIPS Compliant mode is slightly slower then non-FIPS compliant
+
+## [1.7.3] - 2020-06-11
+
+### Fixed
+- Host Factory Host creation no longer makes unecessary database queries, causing
+  performance issues with large numbers of created hosts
+  ([cyberark/conjur#1605](https://github.com/cyberark/conjur/issues/1605))
+
+### Added
+- Password changes (`PUT /authn/:account/password`) now produce audit events with
+  message ID `password` ([cyberark/conjur#1548](https://github.com/cyberark/conjur/issues/1548))
 
 ## [1.7.2] - 2020-06-08
 
@@ -48,9 +64,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - Images are no longer published to Quay.io.
-
-### Security
-- Upgraded Rails to `v5.2.4.3` to resolve [CVE-2020-8164](https://groups.google.com/forum/#!topic/rubyonrails-security/f6ioe4sdpbY).
 
 ## [1.6.0] - 2020-04-14
 
@@ -339,7 +352,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/conjur/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/cyberark/conjur/compare/v1.7.3...HEAD
+[1.7.2]: https://github.com/cyberark/conjur/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/cyberark/conjur/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/cyberark/conjur/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/cyberark/conjur/compare/v1.6.0...v1.7.0
