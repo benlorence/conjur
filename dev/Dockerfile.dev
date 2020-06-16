@@ -1,4 +1,4 @@
-    FROM cyberark/phusion-ruby-fips:0.11-latest
+FROM registry.tld/cyberark/phusion-ruby-fips:0.11-bc103f6
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
