@@ -268,6 +268,10 @@ module RestHelpers
     RestClient::Resource.new(Conjur::Authn::API.host, current_user_basic_auth(password))
   end
 
+  def full_conjur_url(path)
+    URI.parse(Conjur.configuration.appliance_url + path)
+  end
+
   def try_request can
     yield
   rescue RestClient::Exception
@@ -288,6 +292,10 @@ module RestHelpers
   end
 
   protected
+
+  def api_key_for_role_id(role_id)
+    roles[role_id].credentials.api_key
+  end
 
   def denormalize str
     return unless str
