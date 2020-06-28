@@ -9,8 +9,6 @@ module Authentication
     # MissingProviderFieldsInXmsMirid, MissingConstraint,
     # IllegalConstraintCombinations
 
-    AZURE_RESOURCE_TYPES = %w(subscription-id resource-group user-assigned-identity system-assigned-identity)
-
     ValidateResourceRestrictions = CommandClass.new(
       dependencies: {
         role_class:                  ::Role,
@@ -24,7 +22,8 @@ module Authentication
       def call
         extract_resource_restrictions_from_role
         validate_resource_restrictions_configuration
-        validate_resource_restrictions_matches_request
+        extract_resources_from_request
+        validate_resource_restrictions_match_request
       end
 
       private
@@ -37,76 +36,20 @@ module Authentication
         @resource_restrictions ||= @resource_restrictions_class.new(
           role_annotations: role_annotations,
           service_id:       @service_id,
-          azure_resource_types: AZURE_RESOURCE_TYPES,
           logger:           @logger
         )
       end
 
       def validate_resource_restrictions_configuration
-        validate_permitted_scope
-        validate_required_constraints_exist
-        validate_constraint_combinations
-      end
-
-      # validating that the annotations listed for the Conjur resource align with the permitted Azure constraints
-      def validate_permitted_scope
-        validate_prefixed_permitted_annotations("authn-azure/")
-        validate_prefixed_permitted_annotations("authn-azure/#{@service_id}/")
-      end
-
-      # check if annotations with the given prefix is part of the permitted list
-      def validate_prefixed_permitted_annotations prefix
-        @logger.debug(LogMessages::Authentication::ValidatingAnnotationsWithPrefix.new(prefix))
-
-        prefixed_annotations(prefix).each do |annotation|
-          annotation_name = annotation[:name]
-          next if prefixed_permitted_constraints(prefix).include?(annotation_name)
-          raise Errors::Authentication::ConstraintNotSupported.new(annotation_name.gsub(prefix, ""), AZURE_RESOURCE_TYPES)
-        end
-      end
-
-      def prefixed_annotations prefix
-        role_annotations.select do |a|
-          annotation_name = a.values[:name]
-
-          annotation_name.start_with?(prefix) &&
-            # verify we take only annotations from the same level
-            annotation_name.split('/').length == prefix.split('/').length + 1
-        end
-      end
-
-      # add prefix to all permitted constraints
-      def prefixed_permitted_constraints prefix
-        AZURE_RESOURCE_TYPES.map { |k| "#{prefix}#{k}" }
-      end
-
-      def validate_required_constraints_exist
-        validate_resource_constraint_exists "subscription-id"
-        validate_resource_constraint_exists "resource-group"
-      end
-
-      def validate_resource_constraint_exists resource_type
-        resource = resource_restrictions.resources.find { |a| a.type == resource_type }
-        raise Err::RoleMissingConstraint, resource_type unless resource
-      end
-
-      # validates that the resource restrictions do include logical resource constraint
-      # combinations (e.g user_assigned_identity & system_assigned_identity)
-      def validate_constraint_combinations
-        identifiers = %w(user-assigned-identity system-assigned-identity)
-
-        identifiers_constraints = resource_restrictions.resources.map(&:type) & identifiers
-        unless identifiers_constraints.length <= 1
-          raise Errors::Authentication::IllegalConstraintCombinations, identifiers_constraints
-        end
+        resource_restrictions.valid_configuration?
       end
 
       # xms_mirid is a term in Azure to define a claim that describes the resource that holds the encoding of the instance's
       # among other details the subscription_id, resource group, and provider identity needed for authorization.
       # xms_mirid is one of the fields in the JWT token. This function will extract the relevant information from
       # xms_mirid claim and populate a representative hash with the appropriate fields.
-      def extract_resources_from_token
-        @resources_from_token = [
+      def extract_resources_from_request
+        @resources_from_request = [
           AzureResource.new(
             type: "subscription-id",
             value: xms_mirid.subscriptions
@@ -122,14 +65,14 @@ module Authentication
         # If the token is issued to a system-assigned identity then we take the
         # Object ID of the token.
         if xms_mirid.providers.include? "Microsoft.ManagedIdentity"
-          @resources_from_token.push(
+          @resources_from_request.push(
             AzureResource.new(
               type: "user-assigned-identity",
               value: xms_mirid.providers.last
             )
           )
         else
-          @resources_from_token.push(
+          @resources_from_request.push(
             AzureResource.new(
               type: "system-assigned-identity",
               value: @oid_token_field
@@ -143,18 +86,13 @@ module Authentication
         @xms_mirid ||= XmsMirid.new(@xms_mirid_token_field)
       end
 
-      def validate_resource_restrictions_matches_request
-        extract_resources_from_token
-
-        resource_restrictions.resources.each do |resource_from_role|
-          @resources_from_token.each do |resource_from_token|
-            if resource_from_token.type == resource_from_role.type &&
-              resource_from_token.value != resource_from_role.value
-                raise Err::InvalidResourceRestrictions, resource_from_role.type
-            end
-          end
-        end
+      def validate_resource_restrictions_match_request
+        resource_restrictions.match?(@resources_from_request)
         @logger.debug(LogMessages::Authentication::ValidatedResourceRestrictions.new)
+      end
+
+      def role_annotations
+        @role_annotations ||= role.annotations
       end
 
       def role
@@ -163,10 +101,6 @@ module Authentication
         @role = @resource_class[role_id]
         raise Errors::Authentication::Security::RoleNotFound, role_id unless @role
         @role
-      end
-
-      def role_annotations
-        @role_annotations ||= role.annotations
       end
 
       def role_id
