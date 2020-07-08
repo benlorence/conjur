@@ -6,11 +6,11 @@ require 'command_class'
 module Authentication
   module Authn
     Authenticator = CommandClass.new(
-        dependencies: {
-           role_cls:  ::Role,
-           credentials_cls: ::Credentials
-        },
-        inputs:       [:authenticator_input]
+          dependencies: {
+            role_cls:  ::Role,
+            credentials_cls: ::Credentials
+          },
+          inputs:       [:authenticator_input]
       ) do
 
       extend Forwardable
