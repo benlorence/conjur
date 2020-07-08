@@ -21,7 +21,7 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
           expect {subject}.to_not raise_error
         end
 
-        it "should returns true" do
+        it "returns true" do
           expect(subject).to eq(true)
         end
       end
@@ -40,7 +40,7 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
           expect {subject}.to_not raise_error
         end
 
-        it "should returns false" do
+        it "returns false" do
           expect(subject).to eq(false)
         end
       end
