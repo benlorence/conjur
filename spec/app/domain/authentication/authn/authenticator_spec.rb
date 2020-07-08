@@ -48,7 +48,7 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
       context "with an invalid api key" do
         subject do
           ::Authentication::Authn::Authenticator.new(
-            role_cls:  mocked_role,
+            role_cls:        mocked_role,
             credentials_cls: mocked_invalid_api_key_credentials
           ).call(
             authenticator_input: input
