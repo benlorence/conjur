@@ -4,7 +4,7 @@ require 'command_class'
 
 module Authentication
   module Authn
-    Login = C= CommandClass.new(
+    Login = CommandClass.new(
       dependencies: {
         role_cls:        ::Role,
         credentials_cls: ::Credentials
@@ -16,23 +16,19 @@ module Authentication
       def_delegators :@authenticator_input, :account, :credentials, :username
 
       def call
-        return nil unless validate_role_has_credentials
-        authenticate
+        return nil unless role_credentials
         api_key
       end
 
       private
 
-      def validate_role_has_credentials
-        role_credentials
+      def api_key
+        authenticate
+        @success ? role_credentials.api_key : nil
       end
 
       def authenticate
         @success = role_credentials.authenticate(credentials)
-      end
-
-      def api_key
-        @success ? role_credentials.api_key : nil
       end
 
       def role_credentials
