@@ -10,7 +10,7 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
       context "with valid credentials" do
         subject do
            ::Authentication::Authn::Authenticator.new(
-                role_cls:  mocked_role,
+                role_cls:        mocked_role,
                 credentials_cls: mocked_valid_api_key_credentials
            ).call(
              authenticator_input: input
@@ -26,10 +26,10 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
         end
       end
 
-      context "with non-existing role" do
+      context "with a non-existing role" do
         subject do
           ::Authentication::Authn::Authenticator.new(
-              role_cls:  mocked_role,
+              role_cls:        mocked_role,
               credentials_cls: mocked_role_not_found_credentials
           ).call(
             authenticator_input: input
@@ -59,7 +59,7 @@ RSpec.describe 'Authentication::Authn::Authenticator' do
           expect {subject}.to_not raise_error
         end
 
-        it "should return false" do
+        it "returns false" do
           expect(subject).to eq(false)
         end
       end
