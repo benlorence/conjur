@@ -7,7 +7,7 @@ module Authentication
     Login = C= CommandClass.new(
       dependencies: {
         role_cls:        ::Role,
-        credentials_cls: ::Credentials,
+        credentials_cls: ::Credentials
       },
       inputs:       [:authenticator_input]
     ) do
@@ -28,7 +28,7 @@ module Authentication
       end
 
       def authenticate
-         @success = role_credentials.authenticate(credentials)
+        @success = role_credentials.authenticate(credentials)
       end
 
       def api_key

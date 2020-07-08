@@ -7,11 +7,11 @@ module Authentication
   module Authn
     Authenticator = CommandClass.new(
         dependencies: {
-          role_cls:  ::Role,
-          credentials_cls: ::Credentials,
+           role_cls:  ::Role,
+           credentials_cls: ::Credentials
         },
         inputs:       [:authenticator_input]
-    ) do
+      ) do
 
       extend Forwardable
       def_delegators :@authenticator_input, :account, :credentials, :username
@@ -28,7 +28,7 @@ module Authentication
       end
 
       def role_credentials
-        @stored_credentials ||= @credentials_cls[role_id]
+        @role_credentials ||= @credentials_cls[role_id]
       end
 
       def role_id
